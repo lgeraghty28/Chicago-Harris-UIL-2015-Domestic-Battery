@@ -5,3 +5,4 @@
 
 library('RSocrata')
 crimes.data <- ('https://data.cityofchicago.org/resource/ijzp-q8t2.json')
+
