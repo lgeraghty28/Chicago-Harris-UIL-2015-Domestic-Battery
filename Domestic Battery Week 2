@@ -1,0 +1,51 @@
+data <- read.csv("http://data.cityofchicago.org/resource/ijzp-q8t2.csv", stringsAsFactors = F)
+
+attach(crimedata)
+library(ggplot2)
+library(data.table)
+
+names(crimedata) <- tolower(names(crimedata))
+
+data <- subset(data, !is.na(longitude) & !is.na(latitude))
+
+crimedata_loc <- subset(crimedata, !is.na(longitude) & !is.na(latitude))
+
+crimes <- table(crimedata$primary.type) # 34 primary crime types
+crimes <- as.list(names(crimes[crimes > 100])) # only 26 with over 100 observations
+data_new <- subset(crimedata, primary.description %in% crimes)
+ggplot(data_new)+geom_bar(aes(x=primary.description, fill = primary.description))
+
+table(crimedata$description) #description includes 372 potential crime categories, including six 
+#types of aggravated domestic battery
+
+#categorize crimes as aggravated domestic battery vs. not aggravated domestic battery based on
+#"description" field
+
+agg.dom.bat <- c('AGGRAVATED DOMESTIC BATTERY', 'AGGRAVATED DOMESTIC BATTERY: HANDGUN', 'AGGRAVATED DOMESTIC BATTERY: HANDS/FIST/FEET SERIOUS INJURY', 'AGGRAVATED DOMESTIC BATTERY: KNIFE/CUTTING INST', 'AGGRAVATED DOMESTIC BATTERY: OTHER DANG WEAPON', 'AGGRAVATED DOMESTIC BATTERY: OTHER FIREARM')
+
+crimedata$agg.dom.bat <- crimedata$description %in% agg.dom.bat
+#Returns TRUE or FALSE
+
+crimedata$agg.dom.bat <- crimedata$description %in% agg.dom.bat
+
+#plotting summary stats of aggravated domestic battery by description, month, time of day, and location.
+
+agg.dom.bat_data <- table(crimedata$agg.dom.bat_str)
+
+crimedata$agg.dom.bat_str <- rep("not aggravated domestic battery", nrow(crimedata))
+data$violent_str[data$primary.description %in% violent] <- "violent"
+crimedata$agg.dom.bat_str[crimedata$description %in% agg.dom.bat] <- "aggravated domestic battery"
+#creates new row to categorize "aggravated domestic battery" and not "aggravated domestic battery"
+#observations based on description field. 26,847 total aggravated domestic battery observations
+#out of 4,533,117 total.
+
+
+agg.dom.bat_data <- subset(crimedata, agg.dom.bat_str=='aggravated domestic battery')
+ggplot(agg.dom.bat_data)+geom_bar(aes(x=description, fill = description))
+
+#crimes by year
+crimedata$year <- substring(crimedata$date, 9, 10)
+year <- substring(agg.dom.bat_data$date, 9, 10)
+agg.dom.bat_data$year <- substring(agg.dom.bat_data$date, 9, 10)
+table(agg.dom.bat_data$year)
+ggplot(agg.dom.bat_data)+geom_bar(aes(x=primary.type, fill = year))
